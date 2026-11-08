@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Letter in Mint</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@400;500&family=Pinyon+Script&display=swap">
+<style>
+/* Layout: a phone-proportioned page that opens on a sealed mint envelope. Tap it: the flap lifts, the letter rises out, the envelope folds away and the full letter unfolds below a slim mint header. Close the letter and it folds back into the sealed envelope. On wide screens it sits in a phone frame. */
+:root {
+  --stage: #edf9f3;
+  --paper: #fcfffd;
+  --mint: #cdeedd;
+  --mint-soft: #e8f8ef;
+  --mint-deep: #2f9e74;
+  --ink: #1b3a30;
+  --ink-soft: #4f7164;
+  --rose: #e98aa0;
+  --line: #d6f0e3;
+  --shadow: rgba(27, 58, 48, 0.16);
+  --env-back: #86d3b3;
+  --env-front: #f8fdfa;
+  --env-flap: #d9f2e6;
+  --font-script: "Pinyon Script", "Snell Roundhand", cursive;
+  --font-body: "EB Garamond", Georgia, "Times New Roman", serif;
+  --font-label: "Jost", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --stage: #0b1814;
+    --paper: #14302a;
+    --mint: #2c6b57;
+    --mint-soft: #1c4237;
+    --mint-deep: #78d9ae;
+    --ink: #e2f6ec;
+    --ink-soft: #9fc7b6;
+    --rose: #f2a1b4;
+    --line: #2a5446;
+    --shadow: rgba(0, 0, 0, 0.5);
+    --env-back: #16352c;
+    --env-front: #3d836d;
+    --env-flap: #337560;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --stage: #0b1814;
+  --paper: #14302a;
+  --mint: #2c6b57;
+  --mint-soft: #1c4237;
+  --mint-deep: #78d9ae;
+  --ink: #e2f6ec;
+  --ink-soft: #9fc7b6;
+  --rose: #f2a1b4;
+  --line: #2a5446;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --env-back: #16352c;
+  --env-front: #3d836d;
+  --env-flap: #337560;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--stage);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 19px;
+  line-height: 1.6;
+  padding-block: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  justify-content: center;
+}
+.phone {
+  width: 100%;
+  max-width: 400px;
+  min-width: 0;
+  background: var(--paper);
+  position: relative;
+  overflow: hidden;
+}
+.screen { display: flex; flex-direction: column; }
+
+.gamay { font-size: 2px; font-style: italic; color: var(--ink-soft); margin-top: 0.4em; }
+
+/* Stage: closed envelope fills the screen, then shrinks to a header */
+.stage {
+  background: var(--mint);
+  min-height: calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  border-radius: 0;
+  transition: min-height 1s cubic-bezier(0.4, 0, 0.2, 1), padding 1s ease, border-radius 1s ease;
+}
+.is-expanded .stage {
+  min-height: 0;
+  padding: 28px 16px 26px;
+  border-radius: 0 0 32px 32px;
+}
+
+/* Phone frame on larger screens */
+@media (min-width: 700px) and (min-height: 760px) {
+  body { align-items: center; padding-block: 28px; }
+  .phone {
+    height: min(844px, calc(100vh - 56px));
+    border-radius: 44px;
+    border: 9px solid var(--ink);
+    box-shadow: 0 30px 60px -20px var(--shadow);
+  }
+  .screen { height: 100%; overflow-y: auto; scrollbar-width: none; }
+  .screen::-webkit-scrollbar { display: none; }
+  .stage { min-height: 100%; }
+  .is-expanded .stage { min-height: 0; }
+}
+
+/* Envelope */
+.env-wrap { max-height: 460px; width: 100%; transition: max-height 0.9s ease, opacity 0.6s ease 0.2s; }
+.is-expanded .env-wrap { max-height: 0; opacity: 0; pointer-events: none; transition: max-height 0.9s ease, opacity 0.6s ease; }
+.env-inner { padding-top: 130px; padding-bottom: 6px; }
+.env {
+  display: block;
+  width: min(300px, 100%);
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 10px;
+}
+.env:focus-visible { outline: 3px solid var(--rose); outline-offset: 6px; }
+.env-body { position: relative; display: block; width: 100%; aspect-ratio: 3 / 2; }
+.env-body > span { position: absolute; display: block; }
+.env-back { inset: 0; background: var(--env-back); border-radius: 8px; box-shadow: 0 18px 28px -14px var(--shadow); }
+.env-letter {
+  left: 7%; right: 7%; top: 6%; height: 86%;
+  background: var(--paper);
+  border-radius: 6px;
+  z-index: 1;
+  padding: 16px 14px 0;
+  text-align: center;
+  transition: transform 0.6s ease;
+}
+.ml-t { display: block; font-family: var(--font-script); font-size: 30px; line-height: 1.1; color: var(--mint-deep); }
+.ml-s { display: block; font-family: var(--font-label); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-soft); margin: 4px 0 12px; }
+.ml-bar { display: block; height: 4px; border-radius: 2px; background: var(--line); margin: 7px auto 0; }
+.env-front {
+  inset: 0;
+  background: var(--env-front);
+  border-radius: 8px;
+  z-index: 2;
+  clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%);
+}
+.env-flap {
+  left: 0; right: 0; top: 0; height: 56%;
+  background: var(--env-flap);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  transform: perspective(700px) rotateX(0deg);
+  z-index: 3;
+  transition: transform 0.7s ease 0.55s, z-index 0s 0.55s;
+}
+.env-seal {
+  left: 50%; top: 56%;
+  width: 46px; height: 46px; margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  background: var(--rose);
+  box-shadow: inset 0 0 0 3px var(--env-flap), 0 4px 8px -3px var(--shadow);
+  z-index: 4;
+  display: grid !important;
+  place-items: center;
+  transition: opacity 0.3s ease 1.1s, transform 0.3s ease 1.1s;
+}
+.env-seal svg { width: 20px; height: 20px; fill: var(--paper); }
+.is-open .env-flap { transform: perspective(700px) rotateX(180deg); z-index: 0; transition: transform 0.7s ease, z-index 0s 0.35s; }
+.is-open .env-letter { transform: translateY(-58%); transition: transform 0.85s cubic-bezier(0.3, 0.8, 0.3, 1) 0.5s; }
+.is-open .env-seal { opacity: 0; transform: scale(0.5); transition: opacity 0.3s ease, transform 0.3s ease; }
+
+.to-line { font-family: var(--font-script); font-size: 38px; line-height: 1.1; margin: 10px 0 0; text-align: center; color: var(--ink); }
+.hint {
+  font-family: var(--font-label); font-size: 12px; letter-spacing: 0.26em; text-transform: uppercase;
+  margin: 8px 0 0; color: var(--ink); max-height: 30px; overflow: hidden;
+  animation: pulse 2s ease-in-out infinite;
+  transition: opacity 0.4s ease 1.1s, max-height 0.5s ease 1.1s;
+}
+.is-open .hint { opacity: 0; max-height: 0; animation: none; transition: opacity 0.4s ease, max-height 0.8s ease; }
+@keyframes pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+
+.mini-seal {
+  order: -1;
+  width: 46px; height: 0; opacity: 0;
+  padding: 0; border: 0;
+  border-radius: 50%;
+  background: var(--rose);
+  box-shadow: inset 0 0 0 3px var(--mint), 0 4px 8px -3px var(--shadow);
+  display: grid; place-items: center; overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: height 0.9s ease, opacity 0.9s ease 0.3s, margin 0.9s ease;
+}
+.mini-seal svg { width: 20px; height: 20px; fill: var(--paper); }
+.mini-seal:focus-visible { outline: 3px solid var(--rose); outline-offset: 3px; }
+.is-expanded .mini-seal { height: 46px; opacity: 1; margin-bottom: 4px; }
+
+/* Letter reveal */
+.reveal { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 1.1s cubic-bezier(0.4, 0, 0.2, 1); }
+.is-expanded .reveal { grid-template-rows: 1fr; }
+.reveal-inner { min-height: 0; overflow: hidden; visibility: hidden; opacity: 0; transition: opacity 0.5s ease, visibility 0s 1.1s; }
+.is-expanded .reveal-inner { visibility: visible; opacity: 1; transition: opacity 0.9s ease 0.25s, visibility 0s; }
+
+.sheet {
+  position: relative;
+  margin: 20px 14px 22px;
+  background: var(--paper);
+  border-radius: 18px;
+  padding: 34px 24px 28px;
+}
+.sheet::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  pointer-events: none;
+}
+h1 {
+  font-family: var(--font-script);
+  font-weight: 400;
+  font-size: 54px;
+  line-height: 1.02;
+  margin: 8px 0 6px;
+  text-align: center;
+  color: var(--mint-deep);
+  text-wrap: balance;
+}
+.sub {
+  font-family: var(--font-label);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--ink-soft);
+  margin: 0 0 26px;
+}
+.salute { font-family: var(--font-script); font-size: 34px; line-height: 1.1; margin: 0 0 12px; color: var(--ink); }
+.sheet p { margin: 0 0 1.05em; max-width: 34em; }
+.sheet p.first::first-letter {
+  font-family: var(--font-script);
+  font-size: 2.6em;
+  float: left;
+  line-height: 0.85;
+  padding: 0.08em 0.1em 0 0;
+  color: var(--mint-deep);
+}
+.wishes {
+  list-style: none;
+  margin: 1.4em 0;
+  padding: 16px 18px;
+  background: var(--mint-soft);
+  border-radius: 14px;
+  display: grid;
+  gap: 10px;
+}
+.wishes li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; min-width: 0; }
+.wishes svg { width: 18px; height: 18px; margin-top: 6px; fill: var(--rose); }
+.wishes span { font-style: italic; }
+.close { margin-top: 1.6em; }
+.sign { font-family: var(--font-script); font-size: 40px; line-height: 1.1; margin: 4px 0 0; color: var(--mint-deep); }
+
+/* Footer: close the letter, edit names */
+.edit-zone {
+  background: var(--mint);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 26px 16px max(14px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+}
+.btn {
+  font-family: var(--font-label);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 26px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.btn:focus-visible, .edit-toggle:focus-visible, input:focus-visible { outline: 3px solid var(--rose); outline-offset: 3px; }
+.edit-toggle {
+  font-family: var(--font-label); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  background: none; border: 0; color: var(--ink); text-decoration: underline; text-underline-offset: 3px;
+  cursor: pointer; padding: 10px 6px; min-height: 44px;
+}
+.names { display: grid; gap: 10px; background: var(--paper); border-radius: 14px; padding: 14px; margin: 8px 0 6px; width: 100%; }
+.names label { font-family: var(--font-label); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); display: grid; gap: 4px; }
+.names input {
+  font: inherit; font-size: 18px; color: var(--ink); background: var(--mint-soft);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; transition-delay: 0s !important; animation: none !important; }
+}
+
+/* Standalone reset */
+html { color-scheme: light; }
+@media (prefers-color-scheme: dark) { html { color-scheme: dark; } }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="screen" id="screen">
+
+    <div class="stage" id="stage">
+      <button class="mini-seal" id="miniSeal" type="button" tabindex="-1" aria-label="Close the letter">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21C4 15 3 9.500 6.500 6.500C9 4.500 11.500 5.500 12 8C12.500 5.500 15 4.500 17.500 6.500C21 9.500 20 15 12 21Z"/></svg>
+      </button>
+
+      <div class="env-wrap" id="envWrap">
+        <div class="env-inner">
+          <button class="env" id="env" type="button" aria-expanded="false" aria-label="Open the birthday letter">
+            <span class="env-body">
+              <span class="env-back"></span>
+              <span class="env-letter">
+                <span class="ml-t">Happy Birthday</span>
+                <span class="ml-s">A letter for you</span>
+                <span class="ml-bar" style="width:86%"></span>
+                <span class="ml-bar" style="width:70%"></span>
+                <span class="ml-bar" style="width:78%"></span>
+              </span>
+              <span class="env-front"></span>
+              <span class="env-flap"></span>
+              <span class="env-seal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21C4 15 3 9.500 6.500 6.500C9 4.500 11.500 5.500 12 8C12.500 5.500 15 4.500 17.500 6.500C21 9.500 20 15 12 21Z"/></svg></span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <p class="to-line">For <span>my rikajin, baby, honey, etc.</span></p>
+      <p class="hint" id="hint">Tap to open</p>
+    </div>
+
+    <div class="reveal">
+      <div class="reveal-inner">
+        <article class="sheet" id="sheet" tabindex="-1">
+          <h1>Happy Birthday</h1>
+          <p class="sub"></p>
+
+          <p class="salute">Rikajin:3,</p>
+
+          <p class="first">Today is rikajin day, Happy 21th birthday! rikajin tho our age is getting serious, being able to talk to you about everything everyday make me forgett all my worries. You make my ordinary days feel like something worth saving.</p>
+
+          <p>I'm sorry but this is the only thing I can give you this year(utangan sa ko lods bawi ako sa susunod). There is just a lot going on the past few months and I wasn't able to prepare for this special day. Sorry I'm full of reasons</p>
+
+          <p>Anyways, once again Happy Birthday Kang! I hope you have a great day and here are my wishes for you.</p>
+
+          <ul class="wishes" aria-label="My birthday wishes for you">
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21C4 15 3 9.500 6.500 6.500C9 4.500 11.500 5.500 12 8C12.500 5.500 15 4.500 17.500 6.500C21 9.500 20 15 12 21Z"/></svg><span>More birthdays to come and mo pass pa tag 25 kay dli ta hashira HAHA.</span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21C4 15 3 9.500 6.500 6.500C9 4.500 11.500 5.500 12 8C12.500 5.500 15 4.500 17.500 6.500C21 9.500 20 15 12 21Z"/></svg><span>Good health and happy kanunay pero ug ma sad pwede ka naman magpababay sakin ayyy AHAHHAHA.</span></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21C4 15 3 9.500 6.500 6.500C9 4.500 11.500 5.500 12 8C12.500 5.500 15 4.500 17.500 6.500C21 9.500 20 15 12 21Z"/></svg><span>Sana ako parin kahit eto lang kaya ko ayyy mali HAHA.</span></li>
+          </ul>
+
+          <p>Na oout of track na ako HAHA, anyways thank you for being there for me everyday, everytime na nagpapababy ako o nanghihingi ng virtual kisses HAHA sa pag bibigay ng oras sakin pag gusto ko mag call(kasi namimiss ka) thank you sa lahat hon:3 <p class="gamay">I Love You<3</p>.</p>
+
+          <p class="close">Forever yours,</p>
+          <p class="sign">Pavy<3</span></p>
+        </article>
+
+        <div class="edit-zone">
+          <button class="btn" id="close" type="button">Close</button>
+          <div class="names" id="names" hidden>
+            <label for="to">Who is it for?
+              <input id="to" type="text" value="my love" maxlength="24" autocomplete="off">
+            </label>
+            <label for="from">Who is it from?
+              <input id="from" type="text" value="Me" maxlength="24" autocomplete="off">
+            </label>
+          </div>
+          <button class="edit-toggle" id="edit" type="button" aria-expanded="false" aria-controls="names"></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var toEls = document.querySelectorAll("[data-to]");
+  var fromEls = document.querySelectorAll("[data-from]");
+  var toIn = document.getElementById("to");
+  var fromIn = document.getElementById("from");
+  var panel = document.getElementById("names");
+  var editBtn = document.getElementById("edit");
+  var phone = document.getElementById("phone");
+  var screen = document.getElementById("screen");
+  var env = document.getElementById("env");
+  var envWrap = document.getElementById("envWrap");
+  var sheet = document.getElementById("sheet");
+  var closeBtn = document.getElementById("close");
+  var miniSeal = document.getElementById("miniSeal");
+  var state = "closed"; /* closed, opening, open, closing */
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function apply() {
+    var t = toIn.value.trim() || "my love";
+    var f = fromIn.value.trim() || "Me";
+    toEls.forEach(function (e) { e.textContent = t; });
+    fromEls.forEach(function (e) { e.textContent = f; });
+    try { localStorage.setItem("mint-letter-names", JSON.stringify({ t: toIn.value, f: fromIn.value })); } catch (e) {}
+  }
+  try {
+    var saved = JSON.parse(localStorage.getItem("mint-letter-names") || "null");
+    if (saved) { toIn.value = saved.t; fromIn.value = saved.f; }
+  } catch (e) {}
+  apply();
+  toIn.addEventListener("input", apply);
+  fromIn.addEventListener("input", apply);
+
+  editBtn.addEventListener("click", function () {
+    var open = panel.hidden;
+    panel.hidden = !open;
+    editBtn.setAttribute("aria-expanded", String(open));
+    editBtn.textContent = open ? "Done" : "Change the names";
+  });
+
+  function toTop() {
+    screen.scrollTop = 0;
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+
+  /* Open: flap lifts and letter rises, then the letter unfolds */
+  function expand() {
+    phone.classList.add("is-expanded");
+    envWrap.setAttribute("aria-hidden", "true");
+    env.tabIndex = -1;
+    miniSeal.tabIndex = 0;
+    toTop();
+    try { sheet.focus({ preventScroll: true }); } catch (e) {}
+    state = "open";
+  }
+  env.addEventListener("click", function () {
+    if (state !== "closed") return;
+    state = "opening";
+    phone.classList.add("is-open");
+    env.setAttribute("aria-expanded", "true");
+    setTimeout(expand, reduce ? 0 : 1500);
+  });
+
+  /* Close: the letter folds away, then the flap shuts and the seal returns */
+  function fold() {
+    if (state !== "open") return;
+    state = "closing";
+    toTop();
+    phone.classList.remove("is-expanded");
+    miniSeal.tabIndex = -1;
+    envWrap.removeAttribute("aria-hidden");
+    setTimeout(function () {
+      phone.classList.remove("is-open");
+      env.setAttribute("aria-expanded", "false");
+      env.tabIndex = 0;
+      try { env.focus({ preventScroll: true }); } catch (e) {}
+    }, reduce ? 0 : 900);
+    setTimeout(function () { state = "closed"; }, reduce ? 0 : 1900);
+  }
+  closeBtn.addEventListener("click", fold);
+  miniSeal.addEventListener("click", fold);
+})();
+</script>
+</body>
+</html>
